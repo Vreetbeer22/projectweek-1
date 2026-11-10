@@ -8,6 +8,7 @@ load_dotenv()
 
 COGS = [
     "cogs.account",
+    "cogs.blackjack",
     "cogs.test",        # haal deze regel weg als de bot live gaat
 ]
 
