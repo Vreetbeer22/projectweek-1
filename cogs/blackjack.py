@@ -40,11 +40,16 @@ class Spel:
         while waarde(self.dealer) < 17:
             self.trek(self.dealer)
 
+    def is_blackjack(self, hand):
+        return len(hand) == 2 and waarde(hand) == 21
+
     def resultaat(self):
         s = waarde(self.speler)
         d = waarde(self.dealer)
         if s > 21:
             return "verlies"
+        if self.is_blackjack(self.speler) and not self.is_blackjack(self.dealer):
+            return "blackjack"
         if d > 21 or s > d:
             return "winst"
         if s < d:
@@ -53,9 +58,10 @@ class Spel:
 
 # Per resultaat: (tekst, kleur, hoeveel keer je inzet je terugkrijgt)
 UITSLAGEN = {
-    "winst":   ("Je wint!",       discord.Color.green(),      2),
-    "verlies": ("Dealer wint.",   discord.Color.red(),        0),
-    "gelijk":  ("Gelijkspel.",    discord.Color.light_grey(), 1),
+    "blackjack": ("Blackjack! Je wint 3:2", discord.Color.gold(), 2.5),
+    "winst": ("Je wint!", discord.Color.green(), 2),
+    "verlies": ("Dealer wint.", discord.Color.red(), 0),
+    "gelijk": ("Gelijkspel.", discord.Color.light_grey(), 1)
 }
 
 # ---------- 2. Het bericht in Discord ----------
@@ -67,7 +73,7 @@ def maak_embed(spel, einde):
     else:
         kleur = discord.Color.blurple()
         beschrijving = "Kies `/hit` of `/stand`"
-        dealer_waarde = "?"   # tweede dealerkaart is nog verborgen
+        dealer_waarde = waarde(spel.dealer[:1])
 
     embed = discord.Embed(title="Blackjack", description=beschrijving, color=kleur)
     embed.add_field(name="Dealer", value=f"Waarde: **{dealer_waarde}**")
@@ -89,7 +95,7 @@ class Blackjack(commands.Cog):
         if einde:
             del self.spellen[interaction.user.id]
             _, _, factor = UITSLAGEN[spel.resultaat()]
-            database.pas_saldo_aan(interaction.user.id, spel.inzet * factor)
+            database.pas_saldo_aan(interaction.user.id, int(spel.inzet * factor))
             await update_naam(interaction.user)
             content = f"Potje van **{interaction.user.display_name}**"
 
