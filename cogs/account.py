@@ -3,6 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 import database
 from checks import geregistreerd
+from profiel import update_naam
 
 class Account(commands.Cog):
     def __init__(self, bot):
@@ -12,6 +13,7 @@ class Account(commands.Cog):
     async def welkom(self, interaction: discord.Interaction):
         if database.maak_speler(interaction.user.id, interaction.user.name):
             await interaction.response.send_message("Welkom! Je account is aangemaakt en je krijgt 100 tokens.")
+            await update_naam(interaction.user)
         else:
             await interaction.response.send_message("Je hebt al een account.", ephemeral=True)
 
@@ -34,6 +36,7 @@ class Account(commands.Cog):
         else:
             database.pas_saldo_aan(interaction.user.id, 100)
             await interaction.response.send_message("Je hebt 100 tokens gekregen!")
+            await update_naam(interaction.user)
 
 async def setup(bot):
     await bot.add_cog(Account(bot))

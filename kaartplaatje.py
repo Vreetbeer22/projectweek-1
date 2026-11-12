@@ -5,8 +5,9 @@ from PIL import Image
 
 KAARTEN_MAP = Path(__file__).parent / "assets" / "Cards"
 SOORT_NAAM = {"♠": "Spades", "♥": "Hearts", "♦": "Diamonds", "♣": "Clubs"}
-RANG_NAAM = {"A": "Ace", "T": "10", "J": "Jack", "Q": "Queen", "K": "King"}  # 2-9 blijven hetzelfde
-ACHTERKANT = KAARTEN_MAP / "Back.png"  # pas aan als jullie achterkant anders heet
+RANG_NAAM = {"A": "Ace", "T": "10", "J": "Jack", "Q": "Queen", "K": "King"}
+ACHTERKANT = KAARTEN_MAP / "Back.png"
+ACHTERGROND = Path(__file__).parent / "assets" / "background.png"
 
 KAART_HOOGTE = 180   # alle kaarten worden hierop geschaald
 RUIMTE = 12          # ruimte tussen kaarten en rijen
@@ -28,7 +29,7 @@ def rij_breedte(plaatjes):
     return sum(p.width for p in plaatjes) + RUIMTE * (len(plaatjes) - 1)
 
 def maak_tafel(dealer, speler, verberg_dealer=True):
-    """Geeft een discord.File met de dealer bovenaan en de speler onderaan."""
+    "Geeft een discord.File met de dealer bovenaan en de speler onderaan."
     dealer_img = []
     for i, kaart in enumerate(dealer):
         if verberg_dealer and i == 1:
@@ -39,7 +40,7 @@ def maak_tafel(dealer, speler, verberg_dealer=True):
 
     breedte = max(rij_breedte(dealer_img), rij_breedte(speler_img)) + 2 * RAND
     hoogte = 2 * KAART_HOOGTE + RUIMTE * 2 + 2 * RAND
-    tafel = Image.new("RGBA", (breedte, hoogte), TAFEL_KLEUR)
+    tafel = Image.open(ACHTERGROND).convert("RGBA").resize((breedte, hoogte))
 
     for rij, y in ((dealer_img, RAND), (speler_img, RAND + KAART_HOOGTE + RUIMTE * 2)):
         x = (breedte - rij_breedte(rij)) // 2   # rij centreren
