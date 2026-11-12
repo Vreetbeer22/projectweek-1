@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # database 
-db = sqlite3.connect('blackjack.db')
+db = sqlite3.connect('test.db')
 db.execute(
     "CREATE TABLE IF NOT EXISTS spelers ("
     "user_id INTEGER PRIMARY KEY, "
@@ -15,25 +15,28 @@ db.execute(
 )
 db.commit()
 
+#Find root of specific card
+def getCardRoot(rank, suit):
+    stringRank = str(rank)
+    return discord.File("assets/Cards/"+ suit + "/" + stringRank + suit +".png")
+
 #bot
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.default())
 
-@bot.tree.command(name="start", description="Registreer jezelf bij de blackjack bot")
-async def start(interaction: discord.Interaction):
-    cursor = db.execute(
-        "INSERT OR IGNORE INTO spelers (user_id, naam) VALUES (?, ?)",
-        (interaction.user.id, interaction.user.name),
-    )
-    db.commit()
+@bot.tree.command(
+    name="picture",
+)
+async def picture(interaction: discord.Interaction):
 
-    if cursor.rowcount == 1:
-        await interaction.response.send_message("Welkom! Je bent nu geregistreerd.")
-    else:
-        await interaction.response.send_message("Je was al geregistreerd.", ephemeral=True)
+    file = getCardRoot(9, "Diamonds")
+
+    await interaction.response.send_message(
+        file=file
+    )
 
 @bot.event
 async def on_ready():
     await bot.tree.sync()
-    print(f"Ingelogd als {bot.user}")
+    print(f"logged in as {bot.user}")
 
 bot.run(os.environ["Token"])
